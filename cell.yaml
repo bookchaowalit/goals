@@ -1,0 +1,127 @@
+# Goals cell: goals, their tasks, metrics and portfolio mapping, productivity goals, and the goal-side links.
+# project_id and context_id point at the projects cell; they are plain ids (no cross-cell foreign key).
+cell: goals
+title: Goals
+port: 3620
+resources:
+  goal:
+    table: goals
+    plural: goals
+    graph: [title, status, type, category, domain]
+    filters: [status, type, category, domain, priority]
+    fields:
+      title: {type: text, required: true, max_length: 500}
+      description: {type: text}
+      type: {type: enum, values: [yearly, quarterly, monthly, weekly, project]}
+      category: {type: enum, values: [tech, business, life, creative, financial, health]}
+      status: {type: enum, values: [planning, active, completed, abandoned, paused], default: planning}
+      priority: {type: int, default: 3}
+      start_date: {type: date}
+      due_date: {type: date}
+      completed_at: {type: timestamp}
+      progress_percent: {type: int, default: 0, min: 0, max: 100}
+      key_results: {type: text}
+      notes: {type: text}
+      domain: {type: text, max_length: 200}
+  goal-task:
+    table: goal_tasks
+    plural: goal-tasks
+    graph: [title, status, goal_id]
+    filters: [goal_id, status, priority]
+    order: sort_order
+    legacy_values: {priority: {low: 3, medium: 2, high: 1}}
+    fields:
+      goal_id: {type: ref, to: goal}
+      title: {type: text, required: true, max_length: 500}
+      description: {type: text}
+      status: {type: enum, values: [todo, in_progress, done, blocked], default: todo}
+      priority: {type: int, default: 3}
+      due_date: {type: date}
+      completed_at: {type: timestamp}
+      sort_order: {type: int, default: 0}
+      progress_percent: {type: int, default: 0, min: 0, max: 100}
+  goal-metric:
+    table: goal_metrics
+    plural: goal-metrics
+    filters: [goal_id, status, metric_type]
+    unique: [[goal_id, metric_key]]
+    fields:
+      goal_id: {type: ref, to: goal, required: true}
+      metric_key: {type: text, required: true, max_length: 200}
+      name: {type: text, required: true, max_length: 500}
+      description: {type: text}
+      metric_type: {type: enum, values: [key_result, kpi, guardrail], default: key_result}
+      direction: {type: enum, values: [increase, decrease, maintain], default: increase}
+      unit: {type: text, default: count, max_length: 60}
+      baseline_value: {type: real}
+      target_value: {type: real, required: true}
+      current_value: {type: real}
+      status: {type: enum, values: [no_data, on_track, at_risk, off_track, achieved], default: no_data}
+      source_type: {type: enum, values: [manual, task, ai_telemetry, system], default: manual}
+      source_ref: {type: text}
+      evidence_ref: {type: text}
+      period_start: {type: date}
+      period_end: {type: date}
+      notes: {type: text}
+  goal-portfolio-mapping:
+    table: goal_portfolio_mappings
+    plural: goal-portfolio-mappings
+    legacy_id_from: goal_id
+    filters: [goal_id, portfolio_bucket, attention_class, current_season, collision_group, canonical_goal]
+    fields:
+      goal_id: {type: ref, to: goal, required: true, unique: true}
+      portfolio_bucket: {type: enum, required: true, values: [active_bet, infrastructure, maintenance, capability_backlog, option_portfolio, large_scale_builder, frontier, someday_curiosity]}
+      attention_class: {type: enum, required: true, values: [focus, parallel, background, maintenance, explore, option]}
+      attention_cost: {type: int, default: 0, min: 0, max: 5}
+      collision_group: {type: text, required: true, max_length: 200}
+      canonical_goal: {type: text, required: true, max_length: 500}
+      canonical_goal_id: {type: ref, to: goal}
+      current_season: {type: text, required: true, max_length: 100}
+      mapping_confidence: {type: enum, values: [high, provisional, review], default: provisional}
+      mapping_source: {type: text, default: goal-portfolio-rule-v1, max_length: 200}
+      notes: {type: text}
+  productivity-goal:
+    table: productivity_goals
+    plural: productivity-goals
+    filters: [goal_type, is_active]
+    fields:
+      name: {type: text, required: true, max_length: 500}
+      goal_type: {type: enum, required: true, values: [daily_completions, weekly_completions, daily_time, weekly_time, streak]}
+      target_value: {type: real, required: true}
+      current_value: {type: real, default: 0}
+      period_start: {type: date}
+      period_end: {type: date}
+      is_active: {type: bool, default: true}
+  goal-project-link:
+    table: goal_project_links
+    plural: goal-project-links
+    filters: [goal_id, project_id, relation_type]
+    unique: [[goal_id, project_id]]
+    fields:
+      goal_id: {type: ref, to: goal, required: true}
+      project_id: {type: bigint, required: true}
+      relation_type: {type: enum, values: [delivery, supporting], default: delivery}
+      weight: {type: real, default: 1, min: 0.0001}
+      source: {type: text, default: manual, max_length: 200}
+  goal-context-link:
+    table: goal_context_links
+    plural: goal-context-links
+    filters: [goal_id, context_id, relation_type]
+    unique: [[goal_id, context_id]]
+    fields:
+      goal_id: {type: ref, to: goal, required: true}
+      context_id: {type: bigint, required: true}
+      relation_type: {type: enum, values: [primary, supporting], default: primary}
+      weight: {type: real, default: 1, min: 0.0001}
+      source: {type: text, default: manual, max_length: 200}
+  goal-task-project-link:
+    table: goal_task_project_links
+    plural: goal-task-project-links
+    filters: [goal_task_id, project_id, relation_type]
+    unique: [[goal_task_id, project_id]]
+    fields:
+      goal_task_id: {type: ref, to: goal-task, required: true}
+      project_id: {type: bigint, required: true}
+      relation_type: {type: enum, values: [delivery, supporting], default: delivery}
+      weight: {type: real, default: 1, min: 0.0001}
+      source: {type: text, default: manual, max_length: 200}
