@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "goals": {
+      "command": ".venv/bin/goals-mcp",
+      "args": []
+    }
+  }
+}
