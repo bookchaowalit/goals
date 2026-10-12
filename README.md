@@ -1,4 +1,4 @@
-# solo-goals
+# goals
 
 The Goals cell: its own API (Railway, serverless) and its own Neon
 database, described by `cell.yaml` and served by the code in `src/cellkit/`, which
