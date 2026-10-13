@@ -1,5 +1,4 @@
-# goals
-
+# life-goals-api
 The Goals cell: its own API (Railway, serverless) and its own Neon
 database, described by `cell.yaml` and served by the code in `src/cellkit/`, which
 this repository owns. It
@@ -8,9 +7,9 @@ HTTP with the caller's token.
 
 | | |
 |---|---|
-| API | Railway project `goals`, service `goals-api` (Serverless) |
+| API | Railway project `life-goals-api`, service `goals-api` (Serverless) |
 | Publisher | service `goals-publisher` (Railway cron, `*/15 * * * *`) |
-| Data | Neon project `goals`, database `goals` |
+| Data | Neon project `life-goals-api`, database `goals` |
 | Registry | solo-empire `repository-catalog/registries/online-systems.yaml` (`goals`) |
 
 ## API

@@ -1,6 +1,6 @@
 import { defineRailway, project, service } from "railway/iac";
 
-// goals: the Goals cell. Variables stay unmanaged (secrets live in Railway only).
+// life-goals-api: the Goals cell. Variables stay unmanaged (secrets live in Railway only).
 // goals-api sleeps when idle (Railway Serverless) and wakes on the next request.
 // goals-publisher is a cron sweep of the outbox that exits after each run.
 // Every service runs in Singapore next to Neon (aws-ap-southeast-1) and empire-platform; the IaC does not
@@ -16,7 +16,7 @@ export default defineRailway(() => {
     deploy: { cronSchedule: "*/15 * * * *", restartPolicyType: "NEVER" },
   });
 
-  return project("goals", {
+  return project("life-goals-api", {
     variables: { managed: false },
     resources: [api, publisher],
   });
